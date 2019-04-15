@@ -9,16 +9,6 @@
 
 #include "object_recognition_renderer/renderer3d.h"
 #include <object_recognition_renderer/utils.h>
-#include <opencv2/imgproc/imgproc.hpp>
-
-#if CV_MAJOR_VERSION == 3
-#include <opencv2/rgbd.hpp>
-namespace cv {
-using namespace cv::rgbd;
-}
-#else
-#include <opencv2/objdetect/objdetect.hpp>
-#endif
 
 #define LINEMOD_VIZ_IMG 0
 
@@ -50,7 +40,7 @@ void LinemodTrainer::initParam(){
 
 int LinemodTrainer::train(){
 
-    cv::Ptr<cv::linemod::Detector> detector_ = cv::linemod::getDefaultLINEMOD();
+    detector_ = cv::linemod::getDefaultLINEMOD();
 
     // 创建渲染器
     Renderer3d renderer = Renderer3d(meshPath);
@@ -149,23 +139,47 @@ int LinemodTrainer::saveData(std::string path){
 
     if(RsOut && TsOut && KsOut && DsOut){
         for(int i = 0; i < Rs_.size(); i++){
-            RsOut << Rs_[i] << " ";
-            TsOut << Ts_[i] << " ";
-            KsOut << Ks_[i] << " ";
+            RsOut << Rs_[i] << "|";
+            TsOut << Ts_[i] << "|";
+            KsOut << Ks_[i] << "|";
             DsOut << distances_[i] << " ";
         }
-        boost::filesystem::copy_file(meshPath, stlFileName);
-        std::cout << "\033[32m[LinemodTrainer]: saving data success\033[0m" << std::endl;
         RsOut.close();
         TsOut.close();
         KsOut.close();
         DsOut.close();
+        // 序列化opencv detector对象
+        saveCVDetector(path);
+        boost::filesystem::copy_file(meshPath, stlFileName);
+        std::cout << "\033[32m[LinemodTrainer]: saving data success\033[0m" << std::endl;
     }else{
         std::cout << "[LinemodTrainer]: saving data error" << std::endl;
         return -1;
     }
 
     return 0;
+}
+
+int LinemodTrainer::saveCVDetector(const std::string &path){
+    std::string detectorFileName = path + "detector.xml";
+
+    cv::FileStorage fs(detectorFileName, cv::FileStorage::WRITE);
+    detector_->write(fs);
+
+#if CV_MAJOR_VERSION == 3
+    std::vector<cv::String> ids = detector_->classIds();
+#else
+    std::vector < std::string > ids = detector_->classIds();
+#endif
+    fs << "classes" << "[";
+    for (int i = 0; i < (int) ids.size(); ++i)
+    {
+        fs << "{";
+        detector_->writeClass(ids[i], fs);
+        fs << "}"; // current class
+    }
+    fs << "]"; // classes
+    fs.release();
 }
 
 int LinemodTrainer::deleteData(){
@@ -183,5 +197,3 @@ int LinemodTrainer::feedback(){
 LinemodTrainer::~LinemodTrainer(){
 
 }
-
-

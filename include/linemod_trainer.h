@@ -5,6 +5,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#if CV_MAJOR_VERSION == 3
+#include <opencv2/rgbd.hpp>
+namespace cv {
+using namespace cv::rgbd;
+}
+#else
+#include <opencv2/objdetect/objdetect.hpp>
+#endif
 #include "c_base_trainer.h"
 
 using namespace hirop_vision;
@@ -62,6 +70,13 @@ private:
      */
     void initParam();
 
+    /**
+     * @brief       序列化opencv检测器对象
+     * @param   [path] 保存的路径
+     * @return  0 成功 -1 失败
+     */
+    int saveCVDetector(const std::string &path);
+
 private:
     /**
      * @brief Linemod 相关的渲染参数
@@ -88,6 +103,9 @@ private:
     std::vector<cv::Mat> Ts_;
     std::vector<cv::Mat> Ks_;
     std::vector<float> distances_;
+
+    // opencv linemod对象指针
+    cv::Ptr<cv::linemod::Detector> detector_;
 };
 
 #endif

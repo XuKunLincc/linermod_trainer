@@ -1,1 +1,1 @@
-g++ -shared -fPIC main.cpp -o libLinemodTrainer.so -Iinclude -lopencv_core -lopencv_objdetect -lobject_recognition_renderer_3d -lboost_filesystem -std=c++11
+g++ -shared -fPIC main.cpp -o libLinemodTrainer.so -I/home/fshs/work/hirop_vision/hirop_vision_install/include -Iinclude -lopencv_core -lopencv_objdetect -lobject_recognition_renderer_3d -lboost_filesystem -std=c++11
