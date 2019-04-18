@@ -28,8 +28,8 @@ void LinemodTrainer::initParam(){
     param_radius_min_ = 0.6;
     param_radius_max_ = 1.1;
     param_radius_step_ = 0.4;
-    param_width_ = 640;
-    param_height_ = 480;
+    param_width_ = 960;
+    param_height_ = 540;
     param_focal_length_x_ = 525.0;
     param_focal_length_y_ = 525.0;
     param_near_ = 0.1;
